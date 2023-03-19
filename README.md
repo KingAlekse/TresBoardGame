@@ -6,7 +6,7 @@ For practice, I started to program the game using pyhon and pygame library.
 Currently only has working text version for two players and unfinished gui.
 
 Next steps are:
-# 1. Improve commenting code
-# 2. Implement actual gameplay with gui
-# 3. Improve gui
-# 4. Start building ai
+1. Improve commenting code
+2. Implement actual gameplay with gui
+3. Improve gui
+4. Start building ai
