@@ -57,11 +57,12 @@ class Tres:
                         self.blue_stock -= 1
 
     def win_state(self):
-        if self.center[0] == 1 and self.inner_ring[0] == 1 and self.inner_ring[2] == 1:
+        if (self.center[0] == 1 and self.inner_ring[0] == 1 and self.inner_ring[2] == 1) or (self.center[0] == 1 and self.inner_ring[1] == 1 and self.inner_ring[3] == 1):
             return 1
-        if self.center[0] == 2 and self.inner_ring[0] == 2 and self.inner_ring[2] == 2:
+        if (self.center[0] == 2 and self.inner_ring[0] == 2 and self.inner_ring[2] == 2) or (self.center[0] == 2 and self.inner_ring[1] == 2 and self.inner_ring[3] == 2):
             return 2
-        return 0
+        else:
+            return 0
 
     # def able_rotation(self):
     #     if 1 in self.middle_ring or 2 in self.middle_ring:

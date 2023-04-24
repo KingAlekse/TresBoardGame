@@ -8,6 +8,9 @@
 
 import pygame
 import math
+import tresgamelogic
+import random
+from tkinter import messagebox
 
 
 class BoardGUI:
@@ -20,18 +23,22 @@ class BoardGUI:
         # 3 for grey
         pygame.init()
 
+        self.tres = tresgamelogic.Tres()
+
         # same lists as in tres.py. Affected in tres.py and copied in here.
         # Need to think if I should remove these and just use get method for
         # drawing original lists from tres.py
-        self.outer_ring = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        self.middle_ring = [0, 2, 0, 0, 0, 0, 0, 0]
-        self.inner_ring = [0, 0, 1, 3]
-        self.center = [2]
+        self.outer_ring = self.tres.outer_ring
+        self.middle_ring = self.tres.middle_ring
+        self.inner_ring = self.tres.inner_ring
+        self.center = self.tres.center
 
         # tells if player is placing piece or choosing what ring to rotate
         # 0 = waiting for piece to be placed
         # 1 = waiting for ring to be rotated ie. tilt ring by mouse position
-        self.game_state = 1
+        self.game_state = 0
+
+        self.turn = random.randint(1,2)
         
         # 0 for no winners yet ie game continues
         # 1 for yellow winning
@@ -75,18 +82,34 @@ class BoardGUI:
         self.yellow = pygame.transform.scale(self.yellow, (70, 70))
 
         # I "saved time and money" by drawing everything with windows paint,
-        # and now original inner ring is drawn in wrong angle and this is
+        # and now original inner ring is drawn in wrong angle and atm this is
         # best way to rotate it right
         self.rInner = pygame.transform.rotate(self.inner, 45)
+
+        
 
         self.new_game()
     
     def new_game(self):
         while True:
             for event in pygame.event.get():
+                if self.win_state == 0:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if self.game_state == 0:
+                            self.add_piece_location()
+                        elif self.game_state == 1:
+                            self.rotate_ring()
                 if event.type == pygame.QUIT:
                     exit()
-            
+
+            self.font = pygame.font.SysFont('Arial', 32)            
+            if self.turn == 1:
+                self.whosturn = self.font.render("Yellow's turn", True, (255,255,0))
+            else:
+                self.whosturn = self.font.render("Blue's turn", True, (0,191,255))
+            self.howManyYellows = self.font.render(f"{self.tres.yellow_stock}", True, (255,255,0))
+            self.howManyBlues = self.font.render(f"{self.tres.blue_stock}", True, (0,191,255))
+
             self.mouseX = pygame.mouse.get_pos()[0]
             self.mouseY = pygame.mouse.get_pos()[1]
 
@@ -99,27 +122,27 @@ class BoardGUI:
             self.draw_arrows()
 
             self.draw_all_pieces()
+
+            self.screen.blit(self.whosturn, (0,760))
+            self.screen.blit(self.howManyYellows, (0,0))
+            self.screen.blit(self.howManyBlues, (0,40))
+
             
-            pygame.display.flip()
+            if self.win_state != 0:
+                self.game_state = 3
+            
+            if self.win_state == 1:
+                self.yellowWins = self.font.render("Yellow Wins!", True, (255,255,0), (0,0,0))
+                self.screen.blit(self.yellowWins, (450,250))
+
+            if self.win_state == 2:
+                self.yellowWins = self.font.render("Blue Wins!", True, (0,191,255), (0,0,0))
+                self.screen.blit(self.yellowWins, (450,250))
+                
+            
+            pygame.display.update()
             self.clock.tick(30)
 
-    def set_outer_ring(self, lista: list):
-        self.outer_ring = lista
-
-    def set_middle_ring(self, lista: list):
-        self.inner_ring = lista
-
-    def set_inner_ring(self, lista: list):
-        self.inner_ring = lista
-
-    def set_center(self, lista: list):
-        self.center = lista
-
-    def set_game_state(self):
-        if self.game_state == 0:
-            self.game_state = 1
-        else:
-            self.game_state = 0
 
     def draw_arrows(self):
         if self.game_state == 0:
@@ -141,7 +164,7 @@ class BoardGUI:
             self.screen.blit(self.arrowse, (620, 530))
 
     def draw_rings(self):
-        if self.game_state == 0:
+        if self.game_state == 0 or self.game_state == 3:
             self.screen.blit(self.rInner, self.rInner.get_rect(
                 center=(500, 400)).topleft)
             self.screen.blit(self.middle, self.middle.get_rect(
@@ -190,15 +213,15 @@ class BoardGUI:
         if color == 1:
             self.screen.blit(self.yellow, self.yellow.get_rect(
                 center=(
-                500+70*math.cos(math.radians(45*(2*slot)+45)), 400-70*math.sin(math.radians(45*(2*slot)+45)))).topleft)
+                500+70*math.cos(math.radians(45*(-2*slot)+45)), 400-70*math.sin(math.radians(45*(-2*slot)+45)))).topleft)
         elif color == 2:
             self.screen.blit(self.blue, self.blue.get_rect(
                 center=(
-                500+70*math.cos(math.radians(45*(2*slot)+45)), 400-70*math.sin(math.radians(45*(2*slot)+45)))).topleft)
+                500+70*math.cos(math.radians(45*(-2*slot)+45)), 400-70*math.sin(math.radians(45*(-2*slot)+45)))).topleft)
         elif color == 3:
             self.screen.blit(self.grey, self.grey.get_rect(
                 center=(
-                500+70*math.cos(math.radians(45*(2*slot)+45)), 400-70*math.sin(math.radians(45*(2*slot)+45)))).topleft)
+                500+70*math.cos(math.radians(45*(-2*slot)+45)), 400-70*math.sin(math.radians(45*(-2*slot)+45)))).topleft)
         else:
             pass
 
@@ -206,15 +229,15 @@ class BoardGUI:
         if color == 1:
             self.screen.blit(self.yellow, self.yellow.get_rect(
                 center=(
-                500+70*math.cos(math.radians(45*(2*slot)+15)), 400-70*math.sin(math.radians(45*(2*slot)+15)))).topleft)
+                500+70*math.cos(math.radians(45*(-2*slot)+15)), 400-70*math.sin(math.radians(45*(-2*slot)+15)))).topleft)
         elif color == 2:
             self.screen.blit(self.blue, self.blue.get_rect(
                 center=(
-                500+70*math.cos(math.radians(45*(2*slot)+15)), 400-70*math.sin(math.radians(45*(2*slot)+15)))).topleft)
+                500+70*math.cos(math.radians(45*(-2*slot)+15)), 400-70*math.sin(math.radians(45*(-2*slot)+15)))).topleft)
         elif color == 3:
             self.screen.blit(self.grey, self.grey.get_rect(
                 center=(
-                500+70*math.cos(math.radians(45*(2*slot)+15)), 400-70*math.sin(math.radians(45*(2*slot)+15)))).topleft)
+                500+70*math.cos(math.radians(45*(-2*slot)+15)), 400-70*math.sin(math.radians(45*(-2*slot)+15)))).topleft)
         else:
             pass
 
@@ -320,18 +343,51 @@ class BoardGUI:
         if self.game_state == 0 and pygame.mouse.get_pressed()[0] == True :    
             if 295 > self.mouseX and self.mouseX > 255 and 190 > self.mouseY  and self.mouseY > 150:
                 # lisää "3"-slottiin
-                return 3
+                self.tres.add_piece(self.turn,3,0)
+                self.game_state=1
             elif 290 > self.mouseX and self.mouseX > 250 and 650 > self.mouseY and self.mouseY > 610:
-                # lisää "2"-slottiin
-                return 2
+                # lisää "1"-slottiin
+                self.tres.add_piece(self.turn,1,0)
+                self.game_state=1
             elif 747 > self.mouseX and self.mouseX > 707 and 190 > self.mouseY and self.mouseY > 150:
                 # lisää "0"-slottiin
-                return 0
+                self.tres.add_piece(self.turn,0,0)
+                self.game_state=1
             elif 750 > self.mouseX and self.mouseX > 710 and 653 > self.mouseY and self.mouseY > 613:
-                # lisää "1"-slottiin
-                return 1
+                # lisää "2"-slottiin
+                self.tres.add_piece(self.turn,2,0)
+                self.game_state=1
             else:
                 pass
+        self.win_state = self.tres.win_state()
+
+    def rotate_ring(self):
+        if self.game_state == 1 and pygame.mouse.get_pressed()[0] == True:
+            if self.distance < 253 and self.distance > 180:
+                self.tres.rotate(0)
+                self.game_state=0
+                if self.turn == 1:
+                    self.turn = 2
+                else:
+                    self.turn = 1
+            elif self.distance < 180 and self.distance > 110:
+                self.tres.rotate(1)
+                self.game_state=0
+                if self.turn == 1:
+                    self.turn = 2
+                else:
+                    self.turn = 1
+
+            elif self.distance < 110:
+                self.tres.rotate(2)
+                self.game_state=0
+                if self.turn == 1:
+                    self.turn = 2
+                else:
+                    self.turn = 1
+        self.win_state = self.tres.win_state()
+            
+            
 
 if __name__ == "__main__":
     gui = BoardGUI()
