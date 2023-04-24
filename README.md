@@ -10,6 +10,8 @@ RULES FOR THE GAME:
 Aim of the game is have tree in a row in inner circle (the red one).
 Player first adds new piece from one of the 'corners'.
 If this does not lead to win, then the player also rotates one of the circles.
-  Circles can rotate only certain direction: inner and outer clockwise and middle counterclockwise
+  Circles can rotate only certain direction: inner and outer clockwise and middle counterclockwise.
+
 And then is next players turn.
+
 Rinse and repeat.
